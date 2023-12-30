@@ -51,4 +51,37 @@ fp32 pid_calc(pid_struct_t *pid, fp32 fdb, fp32 set)   //µÚ¶ş¸ö²ÎÊıÎª·´À¡Öµ£¬µÚÈ
     return pid->out;
 }
 
+float pid_pitch_calc(pid_struct_t *pid, float ref, float fdb)//refÊÇÄ¿±êÖµ,fdbÊÇµç»ú½âÂëµÄËÙ¶È·µ»ØÖµ
+{
+  float err;
+  pid->set = ref;
+  pid->fdb = fdb;
+  pid->error[1] = pid->error[0];//err[1]ÊÇÉÏÒ»´Î¼ÆËã³öÀ´µÄ²îÖµ
+	
+	err = pid->set - pid->fdb;
+	
+	//¹ıÁã´¦Àí
+	if(err > 8191/2)
+	{
+		err -= 8191;
+	}
+	else if(err < -8191/2)
+	{
+		err += 8191;
+	}
+	
+	
+  pid->error[0] = err;//err[0]ÊÇÕâÒ»´ÎµÄÔ¤ÆÚËÙ¶ÈºÍÊµ¼ÊËÙ¶ÈµÄ²îÖµ,ÕâÁ½¸öÖµÊÇ¿ÉÒÔÊÇ¸ºÊıµÄ
+	
+  pid->Pout  = pid->Kp * pid->error[0];//40 3 0ÊÇ±ê×¼Öµ£¬°ÑÕâ¸ö¼Óµ½watch1ÀïÃæ
+  pid->Iout += pid->Ki * pid->error[0];
+  pid->Dout  = pid->Kd * (pid->error[0] - pid->error[1]);
+  LimitMax(pid->out, pid->max_out);
+  
+  pid->out = pid->Pout + pid->Iout + pid->Dout;
+  LimitMax(pid->out, pid->max_out);
+  return pid->out;//µç»ú·µ»ØµÄ±¨ÎÄÓĞ×ªËÙºÍ×ª¾ØµçÁ÷£¬µ«ÊÇÖ»ÄÜ·¢µçÑ¹Öµ(-30000ÖÁ30000)£¬ÓĞµã³éÏóÕâ¸öPID
+}
+
+
 

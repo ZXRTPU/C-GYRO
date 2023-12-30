@@ -29,7 +29,7 @@ extern void pid_init(pid_struct_t *pid,
 
 extern fp32 pid_calc(pid_struct_t *pid, fp32 ref, fp32 set);
 
-
+float pid_pitch_calc(pid_struct_t *pid, float ref, float fdb);//ref是目标值,fdb是电机解码的速度返回值
 
 
 #endif

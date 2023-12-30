@@ -59,8 +59,12 @@ osThreadId super_capHandle;
 osThreadId UI_taskHandle;
 /* USER CODE END Variables */
 osThreadId INSTaskHandle;
-osThreadId exchangeTaskHandle;
 osThreadId defaultTaskHandle;
+osThreadId ChassistaskHandle;
+osThreadId UItaskHandle;
+osThreadId exchangeTaskHandle;
+osThreadId GimbaltaskHandle;
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
@@ -68,6 +72,11 @@ osThreadId defaultTaskHandle;
 
 void StartINSTask(void const * argument);
 void StartDefaultTask(void const * argument);
+extern void Chassis_task(void const * argument);
+extern void UI_Task(void const * argument);
+extern void exchange_task(void const * argument);
+void gimbal_task(void const * argument);
+
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
@@ -130,23 +139,28 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of INSTask */
- osThreadDef(INSTask, StartINSTask, osPriorityNormal, 0, 2048);
+  osThreadDef(INSTask, StartINSTask, osPriorityNormal, 0, 1024);
   INSTaskHandle = osThreadCreate(osThread(INSTask), NULL);
 
-	  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  /* definition and creation of defaultTask */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-	
-	osThreadDef(Chassistask, Chassis_task, osPriorityRealtime, 0, 512);		//�����ƶ�����
-  Chassis_taskHandle = osThreadCreate(osThread(Chassistask), NULL);
+  /* definition and creation of Chassistask */
+  osThreadDef(Chassistask, Chassis_task, osPriorityRealtime, 0, 512);
+  ChassistaskHandle = osThreadCreate(osThread(Chassistask), NULL);
 
-	
-	osThreadDef(UItask, UI_Task, osPriorityRealtime, 0, 512);
-  UI_taskHandle = osThreadCreate(osThread(UItask), NULL);
-		
-	 osThreadDef(exchangeTask, exchange_task, osPriorityNormal, 0, 128);
+  /* definition and creation of UItask */
+  osThreadDef(UItask, UI_Task, osPriorityRealtime, 0, 512);
+  UItaskHandle = osThreadCreate(osThread(UItask), NULL);
+
+  /* definition and creation of exchangeTask */
+  osThreadDef(exchangeTask, exchange_task, osPriorityNormal, 0, 128);
   exchangeTaskHandle = osThreadCreate(osThread(exchangeTask), NULL);
 
+  /* definition and creation of Gimbaltask */
+  osThreadDef(Gimbaltask, gimbal_task, osPriorityRealtime, 0, 512);
+  GimbaltaskHandle = osThreadCreate(osThread(Gimbaltask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -174,8 +188,13 @@ void StartINSTask(void const * argument)
   /* USER CODE END StartINSTask */
 }
 
-/* Private application code --------------------------------------------------*/
-/* USER CODE BEGIN Application */
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+* @brief Function implementing the defaultTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
@@ -189,4 +208,38 @@ void StartDefaultTask(void const * argument)
   }
   /* USER CODE END StartDefaultTask */
 }
+
+/* USER CODE BEGIN Header_gimbal_task */
+/**
+* @brief Function implementing the Gimbaltask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_gimbal_task */
+__weak void gimbal_task(void const * argument)
+{
+  /* USER CODE BEGIN gimbal_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END gimbal_task */
+}
+
+/* Private application code --------------------------------------------------*/
+/* USER CODE BEGIN Application */
+//void StartDefaultTask(void const * argument)
+//{
+  /* USER CODE BEGIN StartDefaultTask */
+	//HAL_GPIO_WritePin(GPIOH,GPIO_PIN_11,GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(GPIOH,GPIO_PIN_10,GPIO_PIN_SET);
+	//uint8_t TIM1_flag = 1;//��֪��bug
+  /* Infinite loop */
+  //for(;;)
+  //{
+   // osDelay(1);
+  //}
+  /* USER CODE END StartDefaultTask */
+//}
 /* USER CODE END Application */
