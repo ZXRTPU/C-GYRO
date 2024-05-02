@@ -51,6 +51,13 @@ void gimbal_yaw_mode2();
 void rc_yaw_control();
 void lock_gimbal_yaw();
 
+//×ÔÃéÄ£Ê½
+void vision_arm();
+
+void yaw_current_give();
+	
+void	pitch_current_give();
+
 void Gimbal_gyro_speed_current();
 
 void Gimbal_gyro_angle_current();

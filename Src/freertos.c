@@ -62,8 +62,10 @@ osThreadId INSTaskHandle;
 osThreadId defaultTaskHandle;
 osThreadId ChassistaskHandle;
 osThreadId UItaskHandle;
-osThreadId exchangeTaskHandle;
+osThreadId ExchangeTaskHandle;
 osThreadId GimbaltaskHandle;
+osThreadId DaemontaskHandle;
+osThreadId ShoottaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -73,10 +75,13 @@ osThreadId GimbaltaskHandle;
 void StartINSTask(void const * argument);
 void StartDefaultTask(void const * argument);
 extern void Chassis_task(void const * argument);
-extern void UI_Task(void const * argument);
-extern void exchange_task(void const * argument);
-void gimbal_task(void const * argument);
+void StartUItask(void const * argument);
+extern void Exchange_task(void const * argument);
+extern void Gimbal_task(void const * argument);
+void StartDaemontask(void const * argument);
+extern void Shoot_task(void const * argument);
 
+extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
@@ -147,20 +152,28 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of Chassistask */
-  osThreadDef(Chassistask, Chassis_task, osPriorityRealtime, 0, 512);
+  osThreadDef(Chassistask, Chassis_task, osPriorityNormal, 0, 512);
   ChassistaskHandle = osThreadCreate(osThread(Chassistask), NULL);
 
   /* definition and creation of UItask */
-  osThreadDef(UItask, UI_Task, osPriorityRealtime, 0, 512);
+  osThreadDef(UItask, StartUItask, osPriorityNormal, 0, 512);
   UItaskHandle = osThreadCreate(osThread(UItask), NULL);
 
-  /* definition and creation of exchangeTask */
-  osThreadDef(exchangeTask, exchange_task, osPriorityNormal, 0, 128);
-  exchangeTaskHandle = osThreadCreate(osThread(exchangeTask), NULL);
+  /* definition and creation of ExchangeTask */
+  osThreadDef(ExchangeTask, Exchange_task, osPriorityNormal, 0, 128);
+  ExchangeTaskHandle = osThreadCreate(osThread(ExchangeTask), NULL);
 
   /* definition and creation of Gimbaltask */
-  osThreadDef(Gimbaltask, gimbal_task, osPriorityRealtime, 0, 512);
+  osThreadDef(Gimbaltask, Gimbal_task, osPriorityRealtime, 0, 512);
   GimbaltaskHandle = osThreadCreate(osThread(Gimbaltask), NULL);
+
+  /* definition and creation of Daemontask */
+  osThreadDef(Daemontask, StartDaemontask, osPriorityNormal, 0, 128);
+  DaemontaskHandle = osThreadCreate(osThread(Daemontask), NULL);
+
+  /* definition and creation of Shoottask */
+  osThreadDef(Shoottask, Shoot_task, osPriorityNormal, 0, 256);
+  ShoottaskHandle = osThreadCreate(osThread(Shoottask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -177,6 +190,8 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_StartINSTask */
 void StartINSTask(void const * argument)
 {
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartINSTask */
     INS_Init();
     /* Infinite loop */
@@ -209,22 +224,40 @@ void StartDefaultTask(void const * argument)
   /* USER CODE END StartDefaultTask */
 }
 
-/* USER CODE BEGIN Header_gimbal_task */
+/* USER CODE BEGIN Header_StartUItask */
 /**
-* @brief Function implementing the Gimbaltask thread.
+* @brief Function implementing the UItask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_gimbal_task */
-__weak void gimbal_task(void const * argument)
+/* USER CODE END Header_StartUItask */
+void StartUItask(void const * argument)
 {
-  /* USER CODE BEGIN gimbal_task */
+  /* USER CODE BEGIN StartUItask */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END gimbal_task */
+  /* USER CODE END StartUItask */
+}
+
+/* USER CODE BEGIN Header_StartDaemontask */
+/**
+* @brief Function implementing the Daemontask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartDaemontask */
+void StartDaemontask(void const * argument)
+{
+  /* USER CODE BEGIN StartDaemontask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartDaemontask */
 }
 
 /* Private application code --------------------------------------------------*/

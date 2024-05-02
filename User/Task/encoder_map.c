@@ -1,6 +1,6 @@
 #include "encoder_map.h"
 
-//对当前角度即rotor_angle整定到标准编码盘上，返回当前角度
+//瀵瑰綋鍓嶈搴﹀嵆rotor_angle鏁村畾鍒版爣鍑嗙紪鐮佺洏涓婏紝杩斿洖褰撳墠瑙掑害
 int16_t encoder_map_8191(int16_t ZERO_POS,int16_t rotor_angle)
 {
 	int16_t k=0;

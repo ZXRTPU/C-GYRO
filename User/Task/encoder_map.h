@@ -5,10 +5,10 @@
 #include "rc_potocal.h"
 #include "math.h"
 
-//¶Ôµ±Ç°½Ç¶È¼´rotor_angleÕû¶¨µ½±ê×¼±àÂëÅÌÉÏ
+//å¯¹å½“å‰è§’åº¦å³rotor_angleæ•´å®šåˆ°æ ‡å‡†ç¼–ç ç›˜ä¸Š
 int16_t encoder_map_8191(int16_t ZERO_POS,int16_t rotor_angle);
 
-//ÍÓÂİÒÇÊı¾İ±ê×¼»¯
+//é™€èºä»ªæ•°æ®æ ‡å‡†åŒ–
 int16_t encoder_map_360(int16_t ZERO_gyro,int16_t gyro_angle);
 
 #endif

@@ -3,6 +3,15 @@
 
 #include  "rc_potocal.h"
 #include  "judge.h"
+
+//视觉相关
+//记得开启huart1
+UART_HandleTypeDef huart1;
+#define BUFFER_SIZE 100
+char rx_buffer[BUFFER_SIZE];
+int flag=0;
+
+
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 extern DMA_HandleTypeDef hdma_usart6_rx;
@@ -13,6 +22,32 @@ extern DMA_HandleTypeDef hdma_usart6_tx;
 uint8_t usart3_dma_rxbuf[2][USART3_RX_BUF_LEN];
 volatile uint8_t judge_dma_buffer[2][USART6_RX_BUF_LEN] ={0}  ;
 uint8_t judge_receive_length=0;
+
+//视觉传输
+//放入中断回掉函数中
+void USER_UART1_IdleCallback(UART_HandleTypeDef *huart)
+{
+  // 空闲中断回调
+  if (huart->Instance == USART1)
+  {
+    // 停止接收，防止出现接收溢出
+    __HAL_UART_DISABLE_IT(huart, UART_IT_IDLE);
+
+    // 获取空闲中断标志
+    if (__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE))
+    {
+      // 清除空闲中断标志
+      __HAL_UART_CLEAR_IDLEFLAG(huart);
+
+      // 重新启动接收
+      HAL_UART_Receive_IT(huart, (uint8_t *)rx_buffer, BUFFER_SIZE);
+
+      // 设置数据就绪标志
+      flag= 1;
+    }
+  }
+}
+
 
 void USART3_Init(void)
 {

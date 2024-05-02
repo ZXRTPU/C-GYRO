@@ -7,6 +7,7 @@
 #include "drv_can.h"
 #include "ins_task.h"
 #include "rc_potocal.h"
+#include "drv_usart.h"
 
 float ZERO_yaw=0; 
 
@@ -16,7 +17,8 @@ gimbal_motor_info_t pitch_motor;
 extern motor_info_t  motor_info_chassis[4];       //电机信息结构体
 extern INS_t INS;
 extern RC_ctrl_t rc_ctrl;
-
+extern UART_HandleTypeDef huart1;
+extern char rx_buffer[100];
 
 void Gimbal_task(void const * argument)
 {
@@ -52,12 +54,17 @@ static void gimbal_init()
 	 yaw_motor.ZERO_gyro = INS.Yaw;
 	 
 	 pitch_motor.ZERO_gyro = INS.Pitch;
+	 
+	 //视觉接口
+	 __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE); //使能IDLE中断
+	HAL_UART_Receive_DMA(&huart1,(uint8_t*)rx_buffer,100); //开启接收,接受minipc的数据
 }
 
 
 //模式选择
 void gimbal_mode_choice1(void)
 {
+	
 	if(rc_ctrl.rc.s[1]==3 ) //普通模式
 	{
 	  rc_yaw_control(); 
@@ -66,12 +73,22 @@ void gimbal_mode_choice1(void)
 	{
 		lock_gimbal_yaw();
 	}
+	else
+	{
+		yaw_motor.target_speed=0;
+	}
 	
+	if(rc_ctrl.rc.s[0]==2)
+	{
+		vision_arm();
+	}
 }
 
 void gimbal_current_give()
 {
+	yaw_current_give();
 	
+	pitch_current_give();
 }
 
 //===================================过零处理===========================================
@@ -149,6 +166,28 @@ void lock_gimbal_yaw()
 	}
 }
 
+//自瞄模式
+/*
+void vision_arm()
+{
+	if(Pitch_minipc_fp)
+	{
+		pitch_motor.target_angle = motor_info[4].rotor_angle - Pitch_minipc_fp/360.0 * 8191; 
+	}
+	else
+	{
+		pitch_motor.target_angle =  pitch_motor.target_angle -((rc_ctrl.rc.ch[1]) / 660.0 * 2) + rc_ctrl.mouse.y / 16384.00 *1000; 
+	}
+	
+	
+	err_calc();
+	
+	target_speed[4] = pid_pitch_calc(&pitch_motor.gimbal_angle_pid,  pitch_motor.target_angle,  pitch_motor.gyro_pitch_angle);
+	
+	osDelay(1);
+
+}
+*/
 
 
 //=========================================底盘跟随云台模式=====================================================
